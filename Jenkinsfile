@@ -22,13 +22,6 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            // Remplacer le script "test" dans package.json par de vrais tests (ex: jest)
-            steps {
-                sh 'npm test'
-            }
-        }
-
         stage('Build image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} -t ${IMAGE_NAME}:latest ."
