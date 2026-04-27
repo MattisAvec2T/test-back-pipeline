@@ -2,7 +2,10 @@ pipeline {
     agent { label 'docker-agent' }
 
     environment {
-        REPOSITORY = 'https://github.com/MattisAvec2T/test-back-pipeline.git'
+        REPOSITORY     = 'https://github.com/MattisAvec2T/test-back-pipeline.git'
+        IMAGE_NAME     = 'backend-node'
+        CONTAINER_NAME = 'backend-node'
+        PORT           = '3000'
     }
 
     stages {
@@ -19,11 +22,24 @@ pipeline {
             }
         }
 
+        stage('Build image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} -t ${IMAGE_NAME}:latest ."
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+                sh "docker run -d --name ${CONTAINER_NAME} --network devops -p ${PORT}:${PORT} ${IMAGE_NAME}:latest"
+            }
+        }
+
     }
 
     post {
         success {
-            echo 'Backend — install OK.'
+            echo "Backend disponible sur http://localhost:${PORT}"
         }
         failure {
             echo 'Le pipeline a échoué — vérifier les logs ci-dessus.'
