@@ -2,19 +2,12 @@ pipeline {
     agent { label 'docker-agent' }
 
     environment {
-        REPOSITORY     = 'https://github.com/MattisAvec2T/test-back-pipeline.git'
         IMAGE_NAME     = 'test-pipeline-back'
         CONTAINER_NAME = 'test-pipeline-back'
         PORT           = '3000'
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: "${REPOSITORY}"
-            }
-        }
 
         stage('Install') {
             steps {
