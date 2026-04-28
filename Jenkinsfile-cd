@@ -1,0 +1,38 @@
+pipeline {
+    agent { label 'docker-agent' }
+
+    environment {
+        IMAGE_NAME     = 'test-pipeline-back'
+        CONTAINER_NAME = 'test-pipeline-back'
+        DOCKERHUB_USER = 'mattisavec2t'
+        PORT           = '3000'
+        VM_USER        = 'ubuntu'
+        VM_IP          = '0.0.0.0'
+    }
+
+    stages {
+
+        stage('Deploy') {
+            steps {
+                sshagent(['vm-ssh-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${VM_USER}@${VM_IP} \
+                            'docker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:latest; \
+                             docker rm -f ${CONTAINER_NAME} || true; \
+                             docker run -d --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${DOCKERHUB_USER}/${IMAGE_NAME}:latest'
+                    """
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "Backend déployé sur ${VM_IP}:${PORT}"
+        }
+        failure {
+            echo 'Le déploiement a échoué — vérifier les logs ci-dessus.'
+        }
+    }
+}
